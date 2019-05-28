@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using Flee.ExpressionEditor;
 using Flee.ExpressionElements.Base;
 using Flee.InternalTypes;
 
@@ -22,6 +23,17 @@ namespace Flee.ExpressionElements.LogicalBitwise
                 MyChild.Emit(ilg, services);
                 ilg.Emit(OpCodes.Not);
             }
+        }
+
+        internal override Item GetItem(IServiceProvider services)
+        {
+            var item = MyChild.GetItem(services);
+            var group = item as Group;
+            if (group != null)
+            {
+                group.operation = "Not" + group.operation;
+            }
+            return item;
         }
 
         private void EmitLogical(FleeILGenerator ilg, IServiceProvider services)

@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using Flee.ExpressionEditor;
 using Flee.ExpressionElements.Base;
 using Flee.ExpressionElements.Base.Literals;
+using Flee.ExpressionElements.Literals;
 using Flee.ExpressionElements.MemberElements;
 using Flee.InternalTypes;
 using Flee.PublicTypes;
@@ -32,6 +34,11 @@ namespace Flee.ExpressionElements.MemberElements
             MyName = name;
             _myArguments = arguments;
             _myMethods = methods;
+        }
+
+        internal ArgumentList Arguments
+        {
+            get { return _myArguments; }
         }
 
         protected override void ResolveInternal()
@@ -248,6 +255,76 @@ namespace Flee.ExpressionElements.MemberElements
             }
 
             this.EmitFunctionCall(this.NextRequiresAddress, ilg, services);
+        }
+
+        internal override Item GetItem(IServiceProvider services)
+        {
+            if (MemberName == "ZadanaPriloha")
+            {
+                return new Condition
+                {
+                    field = GetIdPrilohy(),
+                    @operator = "Specified"
+                };
+            }
+            else if (MemberName == "NezadanaPriloha")
+            {
+                return new Condition
+                {
+                    field = GetIdPrilohy(),
+                    @operator = "NotSpecified"
+                };
+            }
+            else if (MemberName == "MatchReGroups")
+            {
+                return new MatchReGroups(_myArguments);
+            }
+
+            int argc = 1;
+            if (MemberName == "IsTrue") argc = 0;
+            if (MemberName == "IsFalse") argc = 0;
+            if (MemberName == "IsBlank") argc = 0;
+            if (MemberName == "IsNotBlank") argc = 0;
+
+            var firstArgType = _myArguments[0].ResultType;
+            if (firstArgType == typeof(string))
+            {
+                return GetStringItem(MemberName, argc);
+            }
+            else
+            {
+                return GetItem(MemberName, argc);
+            }
+
+            return base.GetItem(services);
+        }
+
+        private Item GetStringItem(string operatorName, int argc)
+        {
+            var result = new Condition { @operator = operatorName };
+            result.InitField(_myArguments[0]);
+            if (argc != 0)
+            {
+                result.InitStringValueOrSecondField(_myArguments[1]);
+            }
+            return result;
+        }
+
+        private Item GetItem(string operatorName, int argc)
+        {
+            var result = new Condition{ @operator = operatorName };
+            result.InitField(_myArguments[0]);
+            if (argc != 0)
+            {
+                result.InitValueOrSecondField(_myArguments[1]);
+            }
+            return result;
+        }
+
+        private string GetIdPrilohy()
+        {
+            var arg0 = _myArguments[0];
+            return ((StringLiteralElement)arg0).Value;
         }
 
         private void EmitOnDemandFunction(ExpressionElement[] elements, FleeILGenerator ilg, IServiceProvider services)

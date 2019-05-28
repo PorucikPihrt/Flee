@@ -9,7 +9,7 @@ using Flee.ExpressionElements.Literals.Integral;
 
 using Flee.InternalTypes;
 using Flee.PublicTypes;
-
+using Flee.ExpressionEditor;
 
 namespace Flee.ExpressionElements
 {
@@ -277,6 +277,97 @@ namespace Flee.ExpressionElements
             {
                 return OpCodes.Clt;
             }
+        }
+
+        internal override Item GetItem(IServiceProvider services)
+        {
+            Type binaryResultType = ImplicitConverter.GetBinaryResultType(MyLeftChild.ResultType, MyRightChild.ResultType);
+            MethodInfo overloadedOperator = this.GetOverloadedCompareOperator();
+
+            if (this.AreBothChildrenOfType(typeof(string)))
+            {
+                // String equality
+                return GetItemStringEquality();
+            }
+            else if ((overloadedOperator != null))
+            {
+                //base.EmitOverloadedOperatorCall(overloadedOperator, ilg, services);
+                return base.GetItemOverloadedOperatorCall(overloadedOperator, services);
+            }
+            else if ((binaryResultType != null))
+            {
+                // Emit a compare of numeric operands
+                //EmitChildWithConvert(MyLeftChild, binaryResultType, ilg, services);
+                //EmitChildWithConvert(MyRightChild, binaryResultType, ilg, services);
+                //EmitCompareOperation(ilg, _myOperation);
+            }
+            else if (this.AreBothChildrenOfType(typeof(bool)))
+            {
+                // Boolean equality
+                return GetItemBoolEquality();
+            }
+            else if (this.AreBothChildrenReferenceTypes() == true)
+            {
+                // Reference equality
+                //this.EmitRegular(ilg, services);
+            }
+            else if (MyLeftChild.ResultType.IsEnum == true & MyRightChild.ResultType.IsEnum == true)
+            {
+                //this.EmitRegular(ilg, services);
+            }
+            else
+            {
+                Debug.Fail("unknown operand types");
+            }
+
+            return base.GetItem(services);
+        }
+
+        private Item GetItemStringEquality()
+        {
+            var condition = new Condition();
+            condition.InitField(MyLeftChild);
+            condition.InitStringValueOrSecondField(MyRightChild);
+            switch (_myOperation)
+            {
+                case LogicalCompareOperation.Equal:
+                    condition.@operator = "Equals";
+                    break;
+
+                case LogicalCompareOperation.NotEqual:
+                    condition.@operator = "DoesNotEqual";
+                    break;
+
+                case LogicalCompareOperation.LessThan:
+                case LogicalCompareOperation.GreaterThan:
+                case LogicalCompareOperation.LessThanOrEqual:
+                case LogicalCompareOperation.GreaterThanOrEqual:
+                default:
+                    throw new Exception();
+            }
+            return condition;
+        }
+
+        private Item GetItemBoolEquality()
+        {
+            var condition = new Condition();
+            condition.InitField(MyLeftChild);
+            //condition.InitStringValueOrSecondField(MyRightChild);
+            switch (_myOperation)
+            {
+                case LogicalCompareOperation.Equal:
+                    condition.InitBoolOperator(MyRightChild);
+                    break;
+
+                case LogicalCompareOperation.LessThan:
+                case LogicalCompareOperation.GreaterThan:
+                case LogicalCompareOperation.NotEqual:
+                case LogicalCompareOperation.LessThanOrEqual:
+                case LogicalCompareOperation.GreaterThanOrEqual:
+                default:
+                    throw new Exception();
+            }
+            return condition;
         }
     }
 }

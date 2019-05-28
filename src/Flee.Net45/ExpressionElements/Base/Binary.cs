@@ -8,6 +8,8 @@ using Flee.ExpressionElements.LogicalBitwise;
 using Flee.InternalTypes;
 using Flee.PublicTypes;
 using Flee.Resources;
+using Flee.ExpressionEditor;
+using Flee.ExpressionElements.MemberElements;
 
 namespace Flee.ExpressionElements.Base
 {
@@ -107,6 +109,61 @@ namespace Flee.ExpressionElements.Base
             EmitChildWithConvert(MyLeftChild, pLeft.ParameterType, ilg, services);
             EmitChildWithConvert(MyRightChild, pRight.ParameterType, ilg, services);
             ilg.Emit(OpCodes.Call, method);
+        }
+
+        protected Item GetItemOverloadedOperatorCall(MethodInfo method, IServiceProvider services)
+        {
+            var condition = new Condition();
+
+            condition.field = GetFieldName(MyLeftChild);
+
+            switch (method.Name)
+            {
+                case "op_Inequality":
+                    condition.@operator = "DoesNotEqual";
+                    break;
+
+                case "op_Equality":
+                    condition.@operator = "IsEqual";
+                    break;
+
+                default:
+                    throw new Exception(string.Format("Unknown method name: {0}.", method.Name));
+            }
+
+            if (string.IsNullOrEmpty(condition.value) && string.IsNullOrEmpty(condition.secondField))
+            {
+                switch (condition.@operator)
+                {
+                    case "IsEqual":
+                        condition.@operator = "IsBlank";
+                        break;
+
+                    case "DoesNotEqual":
+                        condition.@operator = "IsNotBlank";
+                        break;
+                }
+            }
+
+            return condition;
+        }
+
+        private string GetFieldName(ExpressionElement child)
+        {
+            if (child is IdentifierElement)
+            {
+                var memberName = ((IdentifierElement)child).MemberName;
+                if (memberName.StartsWith("_"))
+                {
+                    memberName = memberName.Substring(1);
+                }
+                return memberName;
+            }
+            if (child is InvocationListElement)
+            {
+                return GetFieldName(((InvocationListElement)child).Tail);
+            }
+            return null;
         }
 
         protected void ThrowOperandTypeMismatch(object operation, Type leftType, Type rightType)

@@ -317,7 +317,7 @@ namespace Flee.ExpressionElements.Base
             members = this.GetAccessibleMembers(members);
 
             // If we have some matches, return them
-            if (members.Length > 0)
+            if (members.Length > 0 && name != "Equals")
             {
                 return members;
             }

@@ -42,5 +42,10 @@ namespace Flee.ExpressionElements.Literals
         }
 
         public override System.Type ResultType => typeof(DateTime);
+
+        public DateTime Value
+        {
+            get { return _myValue; }
+        }
     }
 }

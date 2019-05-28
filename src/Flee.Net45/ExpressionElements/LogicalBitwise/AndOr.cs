@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using Flee.ExpressionEditor;
 using Flee.ExpressionElements.Base;
 using Flee.InternalTypes;
 
@@ -57,6 +58,28 @@ namespace Flee.ExpressionElements.LogicalBitwise
                 ImplicitConverter.EmitImplicitConvert(MyRightChild.ResultType, resultType, ilg);
                 EmitBitwiseOperation(ilg, _myOperation);
             }
+        }
+
+        internal override Item GetItem(IServiceProvider services)
+        {
+            var group = new Group();
+
+            switch (_myOperation)
+            {
+                case AndOrOperation.And:
+                    group.operation = "And";
+                    break;
+                case AndOrOperation.Or:
+                    group.operation = "Or";
+                    break;
+                default:
+                    throw new Exception("Unknown operation.");
+            }
+
+            group.items.Add(MyLeftChild.GetItem(services));
+            group.items.Add(MyRightChild.GetItem(services));
+
+            return group;
         }
 
         private static void EmitBitwiseOperation(FleeILGenerator ilg, AndOrOperation op)

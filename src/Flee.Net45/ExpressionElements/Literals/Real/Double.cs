@@ -46,5 +46,10 @@ namespace Flee.ExpressionElements.Literals.Real
         }
 
         public override System.Type ResultType => typeof(double);
+
+        public double Value
+        {
+            get { return _myValue; }
+        }
     }
 }

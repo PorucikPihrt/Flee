@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using Flee.ExpressionEditor;
 using Flee.InternalTypes;
 using Flee.PublicTypes;
 using Flee.Resources;
@@ -21,6 +22,12 @@ namespace Flee.ExpressionElements.Base
         /// <param name="ilg"></param>
         /// <param name="services"></param>
         public abstract void Emit(FleeILGenerator ilg, IServiceProvider services);
+
+        internal virtual Item GetItem(IServiceProvider services)
+        {
+            return null;
+        }
+
         /// <summary>
         /// All expression elements must expose the Type they evaluate to
         /// </summary>

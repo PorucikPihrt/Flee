@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Flee.ExpressionEditor;
 using Flee.ExpressionElements.Base;
 using Flee.ExpressionElements.MemberElements;
 using Flee.InternalTypes;
@@ -119,6 +120,21 @@ namespace Flee.ExpressionElements.MemberElements
             _myTail.Emit(ilg, services);
         }
 
+        internal MemberElement Tail
+        {
+            get { return _myTail; }
+        }
+
         public override System.Type ResultType => _myTail.ResultType;
+
+        internal override Item GetItem(IServiceProvider services)
+        {
+            if (_myTail is FunctionCallElement)
+            {
+                return _myTail.GetItem(services);
+            }
+
+            return base.GetItem(services);
+        }
     }
 }

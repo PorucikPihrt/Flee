@@ -23,5 +23,10 @@ namespace Flee.ExpressionElements.Literals
         }
 
         public override System.Type ResultType => typeof(string);
+
+        public string Value
+        {
+            get { return _myValue; }
+        }
     }
 }

@@ -23,5 +23,10 @@ namespace Flee.ExpressionElements.Literals
         }
 
         public override System.Type ResultType => typeof(bool);
+
+        public bool Value
+        {
+            get { return _myValue; }
+        }
     }
 }

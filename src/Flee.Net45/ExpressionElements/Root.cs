@@ -8,6 +8,7 @@ using Flee.ExpressionElements.Base;
 using Flee.InternalTypes;
 using Flee.PublicTypes;
 using Flee.Resources;
+using Flee.ExpressionEditor;
 
 namespace Flee.ExpressionElements
 {
@@ -35,6 +36,11 @@ namespace Flee.ExpressionElements
             }
 
             ilg.Emit(OpCodes.Ret);
+        }
+
+        internal override Item GetItem(IServiceProvider services)
+        {
+            return _myChild.GetItem(services);
         }
 
         private void Validate()

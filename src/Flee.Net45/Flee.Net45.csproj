@@ -31,7 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>flee.pfx</AssemblyOriginatorKeyFile>
@@ -57,6 +57,10 @@
     <Compile Include="CalcEngine\PublicTypes\CalculationEngine.cs" />
     <Compile Include="CalcEngine\PublicTypes\Exceptions.cs" />
     <Compile Include="CalcEngine\PublicTypes\SimpleCalcEngine.cs" />
+    <Compile Include="ExpressionEditor\Condition.cs" />
+    <Compile Include="ExpressionEditor\Group.cs" />
+    <Compile Include="ExpressionEditor\Item.cs" />
+    <Compile Include="ExpressionEditor\MatchReGroups.cs" />
     <Compile Include="ExpressionElements\Arithmetic.cs" />
     <Compile Include="ExpressionElements\Base\Binary.cs" />
     <Compile Include="ExpressionElements\Base\ExpressionElement.cs" />

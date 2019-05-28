@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq.Expressions;
 using Flee.CalcEngine.InternalTypes;
 using Flee.CalcEngine.PublicTypes;
+using Flee.ExpressionEditor;
 using Flee.ExpressionElements.Base;
 using Flee.InternalTypes;
 using Flee.Parsing;
@@ -201,6 +202,12 @@ namespace Flee.PublicTypes
         public IGenericExpression<TResultType> CompileGeneric<TResultType>(string expression)
         {
             return new Flee.InternalTypes.Expression<TResultType>(expression, this, true);
+        }
+
+        public Item ParseGeneric<TResultType>(string expression)
+        {
+            var exp = new Flee.InternalTypes.Expression<TResultType>(expression, this, true, onlyParse: true);
+            return exp.Item;
         }
 
         #endregion

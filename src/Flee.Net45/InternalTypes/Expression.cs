@@ -11,6 +11,7 @@ using Flee.ExpressionElements.Base;
 using Flee.PublicTypes;
 using Flee.Resources;
 using IDynamicExpression = Flee.PublicTypes.IDynamicExpression;
+using Flee.ExpressionEditor;
 
 namespace Flee.InternalTypes
 {
@@ -26,7 +27,7 @@ namespace Flee.InternalTypes
         private const string EmitAssemblyName = "FleeExpression";
 
         private const string DynamicMethodName = "Flee Expression";
-        public Expression(string expression, ExpressionContext context, bool isGeneric)
+        public Expression(string expression, ExpressionContext context, bool isGeneric, bool onlyParse = false)
         {
             Utility.AssertNotNull(expression, "expression");
             _myExpression = expression;
@@ -47,7 +48,7 @@ namespace Flee.InternalTypes
 
             this.ValidateOwner(_myOwner);
 
-            this.Compile(expression, _myOptions);
+            this.Compile(expression, _myOptions, onlyParse);
 
             _myContext.CalculationEngine?.FixTemporaryHead(this, _myContext, _myOptions.ResultType);
         }
@@ -66,7 +67,7 @@ namespace Flee.InternalTypes
             _myOptions.SetOwnerType(_myOwner.GetType());
         }
 
-        private void Compile(string expression, ExpressionOptions options)
+        private void Compile(string expression, ExpressionOptions options, bool onlyParse)
         {
             // Add the services that will be used by elements during the compile
             IServiceContainer services = new ServiceContainer();
@@ -81,6 +82,11 @@ namespace Flee.InternalTypes
             }
 
             RootExpressionElement rootElement = new RootExpressionElement(topElement, options.ResultType);
+
+            if (onlyParse)
+            {
+                this.Item = rootElement.GetItem(services);
+            }
 
             DynamicMethod dm = this.CreateDynamicMethod();
 
@@ -203,5 +209,7 @@ namespace Flee.InternalTypes
         }
 
         public ExpressionContext Context => _myContext;
+
+        public Item Item { get; private set; }
     }
 }
