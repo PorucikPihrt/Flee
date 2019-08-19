@@ -67,10 +67,10 @@ namespace Flee.ExpressionElements.LogicalBitwise
             switch (_myOperation)
             {
                 case AndOrOperation.And:
-                    group.operation = "And";
+                    group.operation = Group.AND;
                     break;
                 case AndOrOperation.Or:
-                    group.operation = "Or";
+                    group.operation = Group.OR;
                     break;
                 default:
                     throw new Exception("Unknown operation.");

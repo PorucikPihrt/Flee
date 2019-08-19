@@ -207,7 +207,17 @@ namespace Flee.PublicTypes
         public Item ParseGeneric<TResultType>(string expression)
         {
             var exp = new Flee.InternalTypes.Expression<TResultType>(expression, this, true, onlyParse: true);
-            return exp.Item;
+            return TryFlattening(exp.Item);
+        }
+
+        private Item TryFlattening(Item item)
+        {
+            if (item is Group group)
+            {
+                group.TryFlattening();
+                return group;
+            }
+            return item;
         }
 
         #endregion

@@ -31,7 +31,7 @@ namespace Flee.ExpressionElements.LogicalBitwise
             var group = item as Group;
             if (group != null)
             {
-                group.operation = "Not" + group.operation;
+                group.operation = Group.NOT_PREFIX + group.operation;
             }
             return item;
         }

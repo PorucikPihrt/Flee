@@ -80,6 +80,40 @@ namespace Flee.Expression.Tests
             Assert.AreEqual(3, group.items.Count);
         }
 
+        [TestMethod]
+        public void Parse_OrAndTrippleAnd_Test()
+        {
+            var exp = @"(MatchReGroups(_9c20e9d02aba469cb130202576517d2c;""^\\d{2}(\\d{2})"";_6939ea0ddc304dbf9a28ccd2bc11779a;""^\\d+[.\\s]+(\\d+)[.\\s]+\\d+$"") AND MatchReGroups(_9c20e9d02aba469cb130202576517d2c;""^\\d{4}(\\d{2})"";_6939ea0ddc304dbf9a28ccd2bc11779a;""^(\\d+)"") AND MatchReGroups(_9c20e9d02aba469cb130202576517d2c;""^(\\d{2})"";_6939ea0ddc304dbf9a28ccd2bc11779a;""(\\d{2})$"")) OR (IsBlank(_6939ea0ddc304dbf9a28ccd2bc11779a) AND IsBlank(_9c20e9d02aba469cb130202576517d2c))";
+
+            var context = new ExpressionContext();
+            var zadostExpr = new ZadostExpression();
+            context.Imports.ImportBuiltinTypes();
+            context.Imports.AddType(typeof(ExpressionFunctions));
+            context.Variables.ResolveVariableType += Variables_ResolveVariableTypeString;
+
+            var result = context.ParseGeneric<bool>(exp);
+
+            Assert.AreEqual("group", result.type);
+            var groupOr = (Group)result;
+            Assert.AreEqual("Or", groupOr.operation);
+            Assert.AreEqual(2, groupOr.items.Count);
+
+            var groupAnd1 = (Group)groupOr.items[0];
+            var groupAnd2 = (Group)groupOr.items[1];
+
+            Assert.AreEqual("And", groupAnd1.operation);
+            Assert.AreEqual("And", groupAnd2.operation);
+
+            foreach (var item in groupAnd1.items)
+            {
+                Assert.IsInstanceOfType(item, typeof(Condition));
+            }
+            foreach (var item in groupAnd2.items)
+            {
+                Assert.IsInstanceOfType(item, typeof(Condition));
+            }
+        }
+
         #endregion
 
         #region String
@@ -525,7 +559,7 @@ namespace Flee.Expression.Tests
         [TestMethod]
         public void MatchReGroups_WithRe_Test()
         {
-            var exp = "MatchReGroups(_4a11d5af8466473892e0998b3d4ad37a; \"^(\\d{2})\"; _337fc4e428e84e0492db0af1f8af4459; \"(\\d{2})$\")";
+            var exp = "MatchReGroups(_4a11d5af8466473892e0998b3d4ad37a; \"^(\\\\d{2})\"; _337fc4e428e84e0492db0af1f8af4459; \"(\\\\d{2})$\")";
 
             var context = new ExpressionContext();
             var zadostExpr = new ZadostExpression();
@@ -542,6 +576,48 @@ namespace Flee.Expression.Tests
             Assert.AreEqual("^(\\d{2})", matchRe.re1);
             Assert.AreEqual("337fc4e428e84e0492db0af1f8af4459", matchRe.secondField);
             Assert.AreEqual("(\\d{2})$", matchRe.re2);
+        }
+
+        [TestMethod]
+        public void MatchReGroups_Evaluate_Test()
+        {
+            var exp = "MatchReGroups(_4a11d5af8466473892e0998b3d4ad37a; \"a\"; _337fc4e428e84e0492db0af1f8af4459; \"b\")";
+
+            var context = new ExpressionContext();
+            var zadostExpr = new ZadostExpression();
+            context.Imports.ImportBuiltinTypes();
+            context.Imports.AddType(typeof(ExpressionFunctions));
+            context.Variables.ResolveVariableType += ResolveVariableType_MatchReGroups_Evaluate;
+            context.Variables.ResolveVariableValue += ResolveVariableValue_MatchReGroups_Evaluate;
+
+            var method = context.CompileGeneric<bool>(exp);
+            var result = method.Evaluate();
+
+            Assert.IsTrue(result);
+        }
+
+        private void ResolveVariableValue_MatchReGroups_Evaluate(object sender, ResolveVariableValueEventArgs e)
+        {
+            if (e.VariableName == "_4a11d5af8466473892e0998b3d4ad37a")
+            {
+                e.VariableValue = "123";
+            }
+            else if (e.VariableName == "_337fc4e428e84e0492db0af1f8af4459")
+            {
+                e.VariableValue = new DateTime(1980, 1, 1);
+            }
+        }
+
+        private void ResolveVariableType_MatchReGroups_Evaluate(object sender, ResolveVariableTypeEventArgs e)
+        {
+            if (e.VariableName == "_4a11d5af8466473892e0998b3d4ad37a")
+            {
+                e.VariableType = typeof(string);
+            }
+            else if (e.VariableName == "_337fc4e428e84e0492db0af1f8af4459")
+            {
+                e.VariableType = typeof(DateTime);
+            }
         }
 
         #endregion
@@ -898,12 +974,12 @@ namespace Flee.Expression.Tests
 
         public static bool MatchReGroups(string arg1, string re1, DateTime? arg2, string re2)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public static bool MatchReGroups(string arg1, string re1, DateTime arg2, string re2)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public static bool MatchReGroups(string arg1, string re1, string arg2, string re2)
